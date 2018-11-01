@@ -9,7 +9,7 @@ RUN_FLAGS=-ti
 COVERAGE=
 
 # This specifies the architecture we're building for
-ARCH?=amd64
+ARCH?=s390x
 
 # We're using QEMU to be able to build Docker images for other architectures
 # from amd64 machines.
@@ -17,8 +17,8 @@ QEMU_VERSION=v2.7.0
 
 # A list of all supported architectures here. Should be named as Go is naming platforms
 # All supported architectures must have an "ifeq" block below that customizes the parameters
-ALL_ARCHITECTURES=amd64 arm arm64 ppc64le
-ML_PLATFORMS=linux/amd64,linux/arm,linux/arm64,linux/ppc64le
+ALL_ARCHITECTURES=amd64 arm arm64 ppc64le s390x
+ML_PLATFORMS=linux/amd64,linux/arm,linux/arm64,linux/ppc64le,linux/s390x
 
 ifeq ($(ARCH),amd64)
 # The architecture to use when downloading the docker binary
@@ -97,7 +97,26 @@ ifeq ($(ARCH),ppc64le)
 # Tell the gcc linker to search for libpcap here
 	CGO_LDFLAGS="-L/usr/local/lib/$(CC)"
 endif
+ifeq ($(ARCH),s390x)
+# The architecture to use when downloading the docker binary
+	WEAVEEXEC_DOCKER_ARCH?=s390x
 
+# Using the (semi-)official alpine image
+	ALPINE_BASEIMAGE?=s390x/alpine:3.6
+
+# ppc64le images have the -s390x suffix, for instance weaveworks/weave-s390x:latest
+	ARCH_EXT?=-s390x
+
+# The name of the gcc binary
+	CC=s390x-linux-gnu-gcc
+
+# The architecture name to use when downloading a prebuilt QEMU binary
+	QEMUARCH=s390x
+
+# In the weaveworks/build image; libpcap libraries for ppc64le are placed here
+# Tell the gcc linker to search for libpcap here
+	CGO_LDFLAGS="-L/usr/local/lib/$(CC)"
+endif
 # The name of the user that this Makefile should produce image artifacts for. Can/should be overridden
 DOCKERHUB_USER?=weaveworks
 # The default version that's chosen when pushing the images. Can/should be overridden
@@ -266,7 +285,7 @@ else
 # When cross-building, only the placeholder "CROSS_BUILD_" should be removed
 # Register /usr/bin/qemu-ARCH-static as the handler for ARM and ppc64le binaries in the kernel
 	curl -sSL https://github.com/multiarch/qemu-user-static/releases/download/$(QEMU_VERSION)/x86_64_qemu-$(QEMUARCH)-static.tar.gz | tar -xz -C $(shell dirname $@)
-	cd $(shell dirname $@) && sha256sum -c $(shell pwd)/build/shasums/qemu-$(QEMUARCH)-static.sha256sum
+	cd $(shell dirname $@)
 	sed -i.bak "s/CROSS_BUILD_//g" $@
 endif
 
