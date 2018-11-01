@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-FROM bash
+FROM s390x/bash
 RUN apk add --no-cache curl
 ADD webserver webserver
 EXPOSE 8080
