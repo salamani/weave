@@ -1,5 +1,5 @@
 # This is a nearly-empty image that we use to create a data-only container for persistence
-FROM scratch
+FROM s390x/ubuntu:16.04
 
 # These labels are pretty static, and can therefore be added early on:
 LABEL works.weave.role="system" \
