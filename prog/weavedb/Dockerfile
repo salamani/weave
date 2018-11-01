@@ -1,5 +1,5 @@
 # This is a nearly-empty image that we use to create a data-only container for persistence
-FROM scratch
+FROM s390x/ubuntu:16.04
 LABEL maintainer "Weaveworks Inc <help@weave.works>"
 LABEL works.weave.role=system
 ENTRYPOINT ["data-only"]
